@@ -1,1 +1,1 @@
-Using jupyter-notebook to deploy IRC2 SCORE.
+This repo contains my IRC2 SCORE, I deployed the SCORE using jupyter-notebook.
