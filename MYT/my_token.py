@@ -79,23 +79,6 @@ class stablecoin(IconScoreBase):
     @external(readonly=True)
     def balanceOf(self, _owner: Address) -> int:
         return self._balances[_owner]
-
-   def _transfer(self, _from: Address, _to: Address, _value: int, _data: bytes):
-
-       if _value < 0:
-           revert("Transferring value cannot be less than zero")
-       if self._balances[_from] < _value:
-           revert("Out of balance")
-
-       self._balances[_from] = self._balances[_from] - _value
-       self._balances[_to] = self._balances[_to] + _value
-
-       if _to.is_contract:
-           recipient_score = self.create_interface_score(_to, TokenFallbackInterface)		              
-           recipient_score.tokenFallback(_from, _value, _data)
-
-        self.Transfer(_from, _to, _value, _data)
-        Logger.debug(f'Transfer({_from}, {_to}, {_value}, {_data})', TAG)
     
     @external
     def transfer(self, _to: Address, _value: int, _data: bytes = None):
@@ -135,3 +118,20 @@ class stablecoin(IconScoreBase):
         self._balances[self.msg.sender] -= _amount
         self.Burn(_amount)
         Logger.debug(f'Burned ({_amount}, from treasury ({self.msg.sender},) ', TAG)
+
+    def _transfer(self, _from: Address, _to: Address, _value: int, _data: bytes):
+        if _value < 0:
+           revert("Transferring value cannot be less than zero")
+           
+        if self._balances[_from] < _value:
+           revert("Out of balance")
+
+        self._balances[_from] = self._balances[_from] - _value
+        self._balances[_to] = self._balances[_to] + _value
+
+        if _to.is_contract:
+           recipient_score = self.create_interface_score(_to, TokenFallbackInterface)		              
+           recipient_score.tokenFallback(_from, _value, _data)
+
+        self.Transfer(_from, _to, _value, _data)
+        Logger.debug(f'Transfer({_from}, {_to}, {_value}, {_data})', TAG)
